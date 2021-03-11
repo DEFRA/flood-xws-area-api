@@ -1,0 +1,27 @@
+{
+  "name": "area-api",
+  "version": "0.0.1",
+  "description": "XWS Area sub-system API",
+  "main": "index.js",
+  "scripts": {
+    "lint": "standard",
+    "start": "node index.js",
+    "unit-test": "lab -c -r console -o stdout -r lcov -o lcov.info",
+    "test": "npm run lint && npm run unit-test"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@hapi/hapi": "20.1.0",
+    "dotenv": "8.2.0",
+    "hapi-pino": "8.3.0",
+    "pg": "^8.5.1",
+    "xws-shared": "github:NeXt-Warning-System/common"
+  },
+  "devDependencies": {
+    "@hapi/code": "8.0.2",
+    "@hapi/lab": "24.1.1",
+    "blipp": "4.0.2",
+    "standard": "16.0.3"
+  }
+}

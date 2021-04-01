@@ -1,5 +1,5 @@
-// const joi = require('joi')
-// const schema = require('../lib/schema')
+const joi = require('joi')
+const schema = require('../lib/schema')
 const { Pool } = require('pg')
 
 const db = require('xws-shared/db')
@@ -72,12 +72,12 @@ async function findWarningAreasByBox (xmin, ymin, xmax, ymax) {
     where ar.area_type_ref = 'fwa' and st_intersects(st_setsrid(st_makeenvelope($1, $2, $3, $4), 4326), ar.geom);`, [xmin, ymin, xmax, ymax])
 }
 
-async function getAreasByPoint (lat, lon, type) {
+async function getAreasByPoint (x, y, type) {
   switch (type) {
     case 'faa':
-      return await findAlertAreasByPoint(lon, lat)
+      return await findAlertAreasByPoint(x, y)
     case 'fwa':
-      return await findWarningAreasByPoint(lon, lat)
+      return await findWarningAreasByPoint(x, y)
     default:
       throw Error('Unknown area type')
   }
@@ -99,23 +99,24 @@ module.exports = [
     method: 'GET',
     path: '/areas',
     handler: async (request, h) => {
-      const { lat, lon, xmin, ymin, xmax, ymax, type } = request.query
+      const { coord, bbox, type } = request.query
 
-      const result = lat
-        ? await getAreasByPoint(lat, lon, type)
-        : await getAreasByBox(xmin, ymin, xmax, ymax, type)
-
-      return {
-        result
+      if (coord) {
+        const [x, y] = coord.split(',')
+        return await getAreasByPoint(x, y, type)
+      } else {
+        const [xmin, ymin, xmax, ymax] = bbox.split(',')
+        return await getAreasByBox(xmin, ymin, xmax, ymax, type)
       }
     },
     options: {
-      // validate: {
-      //   query: joi.object().keys({
-      //     address: schema.address,
-      //     channelType: schema.channelType
-      //   })
-      // },
+      validate: {
+        query: joi.object({
+          coord: schema.coord,
+          bbox: schema.bbox,
+          type: schema.type
+        }).oxor('coord', 'bbox')
+      },
       description: 'Get areas within a bounding box'
     }
   }

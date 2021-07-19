@@ -97,7 +97,7 @@ async function getAreasByBox (xmin, ymin, xmax, ymax, type) {
 module.exports = [
   {
     method: 'GET',
-    path: '/areas',
+    path: '/area',
     handler: async (request, h) => {
       const { coord, bbox, type } = request.query
 

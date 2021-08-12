@@ -28,10 +28,13 @@ variables:                    # Pass environment variables as key value pairs.
   ENV: local
   PORT: 3004
   HOST: 0.0.0.0
-  DATABASE_URL: "postgres://postgres:postgres@xws-db.flood-xws-contact.local:5432/postgres"
+  Test: 12345
+  # DATABASE_URL: "postgres://postgres:postgres@xws-db.flood-xws-contact.local:5432/postgres"
 #
 
-#secrets:                      # Pass secrets from AWS Systems Manager (SSM) Parameter Store.
+secrets:                      # Pass secrets from AWS Systems Manager (SSM) Parameter Store.
+  DATABASE_URL: /flood-xws-contact/test/xws-area-api/DATABASE_URL
+
 #  GITHUB_TOKEN: GITHUB_TOKEN  # The key is the name of the environment variable, the value is the name of the SSM parameter.
 
 # You can override any of the values defined above by environment.

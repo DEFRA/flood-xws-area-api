@@ -9,18 +9,18 @@ Parameters:
     Type: String
     Description: The name of the service, job, or workflow being deployed.
   # Customize your Aurora Serverless cluster by setting the default value of the following parameters.
-  myclusterDBName:
+  areaclusterDBName:
     Type: String
     Description: The name of the initial database to be created in the DB cluster.
     Default: area
     # Cannot have special characters
     # Naming constraints: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/CHAP_Limits.html#RDS_Limits.Constraints
-  myclusterDBAutoPauseSeconds:
+  areaclusterDBAutoPauseSeconds:
     Type: Number
     Description: The duration in seconds before the cluster pauses.
     Default: 1000
 Mappings:
-  myclusterEnvScalingConfigurationMap: 
+  areaclusterEnvScalingConfigurationMap: 
     test:
       "DBMinCapacity": 2 # AllowedValues: [2, 4, 8, 16, 32, 64, 192, 384]
       "DBMaxCapacity": 8 # AllowedValues: [2, 4, 8, 16, 32, 64, 192, 384]
@@ -31,27 +31,27 @@ Mappings:
       
 
 Resources:
-  myclusterDBSubnetGroup:
+  areaclusterDBSubnetGroup:
     Type: 'AWS::RDS::DBSubnetGroup'
     Properties:
       DBSubnetGroupDescription: Group of Copilot private subnets for Aurora cluster.
       SubnetIds:
         !Split [',', { 'Fn::ImportValue': !Sub '${App}-${Env}-PrivateSubnets' }]
-  myclusterSecurityGroup:
+  areaclusterSecurityGroup:
     Metadata:
-      'aws:copilot:description': 'A security group for your workload to access the DB cluster mycluster'
+      'aws:copilot:description': 'A security group for your workload to access the DB cluster areacluster'
     Type: 'AWS::EC2::SecurityGroup'
     Properties:
-      GroupDescription: !Sub 'The Security Group for ${Name} to access DB cluster mycluster.'
+      GroupDescription: !Sub 'The Security Group for ${Name} to access DB cluster areacluster.'
       VpcId:
         Fn::ImportValue:
           !Sub '${App}-${Env}-VpcId'
       Tags:
         - Key: Name
           Value: !Sub 'copilot-${App}-${Env}-${Name}-Aurora'
-  myclusterDBClusterSecurityGroup:
+  areaclusterDBClusterSecurityGroup:
     Metadata:
-      'aws:copilot:description': 'A security group for your DB cluster mycluster'
+      'aws:copilot:description': 'A security group for your DB cluster areacluster'
     Type: AWS::EC2::SecurityGroup
     Properties:
       GroupDescription: The Security Group for the database cluster.
@@ -60,11 +60,11 @@ Resources:
           FromPort: 5432
           IpProtocol: tcp
           Description: !Sub 'From the Aurora Security Group of the workload ${Name}.'
-          SourceSecurityGroupId: !Ref myclusterSecurityGroup
+          SourceSecurityGroupId: !Ref areaclusterSecurityGroup
       VpcId:
         Fn::ImportValue:
           !Sub '${App}-${Env}-VpcId'
-  myclusterAuroraSecret:
+  areaclusterAuroraSecret:
     Metadata:
       'aws:copilot:description': 'A Secrets Manager secret to store your DB credentials'
     Type: AWS::SecretsManager::Secret
@@ -76,7 +76,7 @@ Resources:
         ExcludePunctuation: true
         IncludeSpace: false
         PasswordLength: 16
-  myclusterDBClusterParameterGroup:
+  areaclusterDBClusterParameterGroup:
     Metadata:
       'aws:copilot:description': 'A DB parameter group for engine configuration values'
     Type: 'AWS::RDS::DBClusterParameterGroup'
@@ -85,39 +85,39 @@ Resources:
       Family: 'aurora-postgresql10'
       Parameters:
         client_encoding: 'UTF8'
-  myclusterDBCluster:
+  areaclusterDBCluster:
     Metadata:
-      'aws:copilot:description': 'The mycluster Aurora Serverless database cluster'
+      'aws:copilot:description': 'The areacluster Aurora Serverless database cluster'
     Type: 'AWS::RDS::DBCluster'
     Properties:
       MasterUsername:
-        !Join [ "",  [ '{{resolve:secretsmanager:', !Ref myclusterAuroraSecret, ":SecretString:username}}" ]]
+        !Join [ "",  [ '{{resolve:secretsmanager:', !Ref areaclusterAuroraSecret, ":SecretString:username}}" ]]
       MasterUserPassword:
-        !Join [ "",  [ '{{resolve:secretsmanager:', !Ref myclusterAuroraSecret, ":SecretString:password}}" ]]
-      DatabaseName: !Ref myclusterDBName
+        !Join [ "",  [ '{{resolve:secretsmanager:', !Ref areaclusterAuroraSecret, ":SecretString:password}}" ]]
+      DatabaseName: !Ref areaclusterDBName
       Engine: 'aurora-postgresql'
       EngineVersion: '10.12'
       EngineMode: serverless
-      DBClusterParameterGroupName: !Ref myclusterDBClusterParameterGroup
-      DBSubnetGroupName: !Ref myclusterDBSubnetGroup
+      DBClusterParameterGroupName: !Ref areaclusterDBClusterParameterGroup
+      DBSubnetGroupName: !Ref areaclusterDBSubnetGroup
       VpcSecurityGroupIds:
-        - !Ref myclusterDBClusterSecurityGroup
+        - !Ref areaclusterDBClusterSecurityGroup
       ScalingConfiguration:
         AutoPause: true
         # Replace "All" below with "!Ref Env" to set different autoscaling limits per environment.
-        MinCapacity: !FindInMap [myclusterEnvScalingConfigurationMap, All, DBMinCapacity]
-        MaxCapacity: !FindInMap [myclusterEnvScalingConfigurationMap, All, DBMaxCapacity]
-        SecondsUntilAutoPause: !Ref myclusterDBAutoPauseSeconds
-  myclusterSecretAuroraClusterAttachment:
+        MinCapacity: !FindInMap [areaclusterEnvScalingConfigurationMap, All, DBMinCapacity]
+        MaxCapacity: !FindInMap [areaclusterEnvScalingConfigurationMap, All, DBMaxCapacity]
+        SecondsUntilAutoPause: !Ref areaclusterDBAutoPauseSeconds
+  areaclusterSecretAuroraClusterAttachment:
     Type: AWS::SecretsManager::SecretTargetAttachment
     Properties:
-      SecretId: !Ref myclusterAuroraSecret
-      TargetId: !Ref myclusterDBCluster
+      SecretId: !Ref areaclusterAuroraSecret
+      TargetId: !Ref areaclusterDBCluster
       TargetType: AWS::RDS::DBCluster
 Outputs:
-  myclusterSecret: # injected as MYCLUSTER_SECRET environment variable by Copilot.
+  databaseConnection: # injected as DATABASE_CONNECTION environment variable by Copilot.
     Description: "The JSON secret that holds the database username and password. Fields are 'host', 'port', 'dbname', 'username', 'password', 'dbClusterIdentifier' and 'engine'"
-    Value: !Ref myclusterAuroraSecret
-  myclusterSecurityGroup:
+    Value: !Ref areaclusterAuroraSecret
+  areaclusterSecurityGroup:
     Description: "The security group to attach to the workload."
-    Value: !Ref myclusterSecurityGroup
+    Value: !Ref areaclusterSecurityGroup

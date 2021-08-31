@@ -17,6 +17,19 @@ const pool = new Pool({
 const { query } = db(pool)
 
 /**
+ * Find first flood area with code
+ *
+ * @param {string} code - The target area code
+ */
+async function findAreaByCode (code) {
+  const [result] = await query(`
+    select code, area_type_ref as "type", region, name, description
+    from xws_area.area ar
+    where ar.code = $1;`, [code])
+  return result
+}
+
+/**
  * Find all flood alert areas that intersect a point
  *
  * @param {number} x - The x co-ordinate (Easting/longitude)
@@ -99,9 +112,11 @@ module.exports = [
     method: 'GET',
     path: '/area',
     handler: async (request, h) => {
-      const { coord, bbox, type } = request.query
+      const { coord, bbox, type, code } = request.query
 
-      if (coord) {
+      if (code) {
+        return await findAreaByCode(code)
+      } else if (coord) {
         const [x, y] = coord.split(',')
         return await getAreasByPoint(x, y, type)
       } else {
@@ -112,10 +127,11 @@ module.exports = [
     options: {
       validate: {
         query: joi.object({
+          code: schema.code,
           coord: schema.coord,
           bbox: schema.bbox,
           type: schema.type
-        }).oxor('coord', 'bbox')
+        }).oxor('coord', 'bbox', 'code')
       },
       description: 'Get areas within a bounding box'
     }

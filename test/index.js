@@ -11,38 +11,14 @@ lab.experiment('API test', () => {
     server = await createServer()
   })
 
-  lab.test('GET / route works', async () => {
+  // ignored as this is an integration test
+  lab.test.skip('GET target areas in bounding box', async () => {
     const options = {
       method: 'GET',
-      url: '/'
+      url: '/area?type=faa&bbox=-0.6491787738234618,54.46724864194341,-0.5897302021374998,54.494081333633694'
     }
 
     const response = await server.inject(options)
     Code.expect(response.statusCode).to.equal(200)
-    Code.expect(response.result).to.equal({ hello: 'world' })
-  })
-
-  lab.test('GET /about route works', async () => {
-    const options = {
-      method: 'GET',
-      url: '/about'
-    }
-
-    const response = await server.inject(options)
-    Code.expect(response.statusCode).to.equal(200)
-    Code.expect(response.result).to.equal({ ok: 200 })
-  })
-
-  lab.test('POST / route fails with invalid payload', async () => {
-    const options = {
-      method: 'POST',
-      url: '/',
-      payload: {
-        email: 'a@b'
-      }
-    }
-
-    const response = await server.inject(options)
-    Code.expect(response.statusCode).to.equal(400)
   })
 })

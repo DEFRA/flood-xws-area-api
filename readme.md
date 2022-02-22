@@ -1,5 +1,5 @@
-# contact-api
-XWS contact API 
+# flood-xws-area-api
+XWS Area API 
 
 # Environment variables
 

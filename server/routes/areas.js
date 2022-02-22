@@ -1,9 +1,6 @@
 const joi = require('joi')
-const schema = require('../lib/schema')
 const { Pool } = require('pg')
-
-const db = require('xws-shared/db')
-
+const db = require('flood-xws-common/db')
 const config = require('../config')
 
 /**
@@ -16,95 +13,108 @@ const pool = new Pool({
 
 const { query } = db(pool)
 
-/**
- * Find first flood area with code
- *
- * @param {string} code - The target area code
- */
-async function findAreaByCode (code) {
-  const [result] = await query(`
-    select code, area_type_ref as "type", region, name, description
-    from xws_area.area ar
-    where ar.code = $1;`, [code])
-  return result
-}
+// /**
+//  * Find first flood area with code
+//  *
+//  * @param {string} code - The target area code
+//  */
+// async function findAreaByCode (code) {
+//   const [result] = await query(`
+//     select code, area_type_ref as "type", region, name, description
+//     from xws_area.area ar
+//     where ar.code = $1;`, [code])
+//   return result
+// }
+
+// /**
+//  * Find all flood alert areas that intersect a point
+//  *
+//  * @param {number} x - The x co-ordinate (Easting/longitude)
+//  * @param {number} y - The y co-ordinate (Northing/latitude)
+//  */
+// async function findAlertAreasByPoint (x, y) {
+//   return query(`
+//     select *, st_asgeojson(geom) as geojson
+//     from xws_area.area ar
+//     where ar.area_type_ref = 'faa' and st_intersects(st_setsrid(st_makepoint($1, $2), 4326), ar.geom);`, [x, y])
+// }
+
+// /**
+//  * Find all flood warning areas that intersect a point
+//  *
+//  * @param {number} x - The x co-ordinate (Easting/longitude)
+//  * @param {number} y - The y co-ordinate (Northing/latitude)
+//  */
+// async function findWarningAreasByPoint (x, y) {
+//   return query(`
+//     select *, st_asgeojson(geom) as geojson
+//     from xws_area.area ar
+//     where ar.area_type_ref = 'fwa' and st_intersects(st_setsrid(st_makepoint($1, $2), 4326), ar.geom);`, [x, y])
+// }
+
+// /**
+//  * Find all flood alert areas that intersect a bounding box
+//  *
+//  * @param {number} xmin - The x-min co-ordinate (Easting/longitude)
+//  * @param {number} ymin - The y-max co-ordinate (Northing/latitude)
+//  * @param {number} xmax - The x-max co-ordinate (Easting/longitude)
+//  * @param {number} ymax - The y-max co-ordinate (Northing/latitude)
+//  */
+// async function findAlertAreasByBox (xmin, ymin, xmax, ymax) {
+//   return query(`
+//     select *, st_asgeojson(geom) as geojson
+//     from xws_area.area ar
+//     where ar.area_type_ref = 'faa' and st_intersects(st_setsrid(st_makeenvelope($1, $2, $3, $4), 4326), ar.geom);`, [xmin, ymin, xmax, ymax])
+// }
+
+// /**
+//  * Find all flood warning areas that intersect a bounding box
+//  *
+//  * @param {number} xmin - The x-min co-ordinate (Easting/longitude)
+//  * @param {number} ymin - The y-max co-ordinate (Northing/latitude)
+//  * @param {number} xmax - The x-max co-ordinate (Easting/longitude)
+//  * @param {number} ymax - The y-max co-ordinate (Northing/latitude)
+//  */
+// async function findWarningAreasByBox (xmin, ymin, xmax, ymax) {
+//   return query(`
+//     select *, st_asgeojson(geom) as geojson
+//     from xws_area.area ar
+//     where ar.area_type_ref = 'fwa' and st_intersects(st_setsrid(st_makeenvelope($1, $2, $3, $4), 4326), ar.geom);`, [xmin, ymin, xmax, ymax])
+// }
+
+// async function getAreasByPoint (x, y, type) {
+//   switch (type) {
+//     case 'faa':
+//       return await findAlertAreasByPoint(x, y)
+//     case 'fwa':
+//       return await findWarningAreasByPoint(x, y)
+//     default:
+//       throw Error('Unknown area type')
+//   }
+// }
+
+// async function getAreasByBox (xmin, ymin, xmax, ymax, type) {
+//   switch (type) {
+//     case 'faa':
+//       return await findAlertAreasByBox(xmin, ymin, xmax, ymax)
+//     case 'fwa':
+//       return await findWarningAreasByBox(xmin, ymin, xmax, ymax)
+//     default:
+//       throw Error('Unknown area type')
+//   }
+// }
 
 /**
- * Find all flood alert areas that intersect a point
+ * Find all flood areas that intersect a point
  *
  * @param {number} x - The x co-ordinate (Easting/longitude)
  * @param {number} y - The y co-ordinate (Northing/latitude)
  */
-async function findAlertAreasByPoint (x, y) {
+async function findAreasByPoint (x, y) {
   return query(`
-    select *, st_asgeojson(geom) as geojson
-    from xws_area.area ar
-    where ar.area_type_ref = 'faa' and st_intersects(st_setsrid(st_makepoint($1, $2), 4326), ar.geom);`, [x, y])
-}
-
-/**
- * Find all flood warning areas that intersect a point
- *
- * @param {number} x - The x co-ordinate (Easting/longitude)
- * @param {number} y - The y co-ordinate (Northing/latitude)
- */
-async function findWarningAreasByPoint (x, y) {
-  return query(`
-    select *, st_asgeojson(geom) as geojson
-    from xws_area.area ar
-    where ar.area_type_ref = 'fwa' and st_intersects(st_setsrid(st_makepoint($1, $2), 4326), ar.geom);`, [x, y])
-}
-
-/**
- * Find all flood alert areas that intersect a bounding box
- *
- * @param {number} xmin - The x-min co-ordinate (Easting/longitude)
- * @param {number} ymin - The y-max co-ordinate (Northing/latitude)
- * @param {number} xmax - The x-max co-ordinate (Easting/longitude)
- * @param {number} ymax - The y-max co-ordinate (Northing/latitude)
- */
-async function findAlertAreasByBox (xmin, ymin, xmax, ymax) {
-  return query(`
-    select *, st_asgeojson(geom) as geojson
-    from xws_area.area ar
-    where ar.area_type_ref = 'faa' and st_intersects(st_setsrid(st_makeenvelope($1, $2, $3, $4), 4326), ar.geom);`, [xmin, ymin, xmax, ymax])
-}
-
-/**
- * Find all flood warning areas that intersect a bounding box
- *
- * @param {number} xmin - The x-min co-ordinate (Easting/longitude)
- * @param {number} ymin - The y-max co-ordinate (Northing/latitude)
- * @param {number} xmax - The x-max co-ordinate (Easting/longitude)
- * @param {number} ymax - The y-max co-ordinate (Northing/latitude)
- */
-async function findWarningAreasByBox (xmin, ymin, xmax, ymax) {
-  return query(`
-    select *, st_asgeojson(geom) as geojson
-    from xws_area.area ar
-    where ar.area_type_ref = 'fwa' and st_intersects(st_setsrid(st_makeenvelope($1, $2, $3, $4), 4326), ar.geom);`, [xmin, ymin, xmax, ymax])
-}
-
-async function getAreasByPoint (x, y, type) {
-  switch (type) {
-    case 'faa':
-      return await findAlertAreasByPoint(x, y)
-    case 'fwa':
-      return await findWarningAreasByPoint(x, y)
-    default:
-      throw Error('Unknown area type')
-  }
-}
-
-async function getAreasByBox (xmin, ymin, xmax, ymax, type) {
-  switch (type) {
-    case 'faa':
-      return await findAlertAreasByBox(xmin, ymin, xmax, ymax)
-    case 'fwa':
-      return await findWarningAreasByBox(xmin, ymin, xmax, ymax)
-    default:
-      throw Error('Unknown area type')
-  }
+    select code, name
+    from xws_area.area a
+    where st_intersects(st_setsrid(st_makepoint($1, $2), 4326), a.geom);`, [x, y])
 }
 
 module.exports = [
@@ -112,28 +122,18 @@ module.exports = [
     method: 'GET',
     path: '/area',
     handler: async (request, h) => {
-      const { coord, bbox, type, code } = request.query
+      const { x, y } = request.query
 
-      if (code) {
-        return await findAreaByCode(code)
-      } else if (coord) {
-        const [x, y] = coord.split(',')
-        return await getAreasByPoint(x, y, type)
-      } else {
-        const [xmin, ymin, xmax, ymax] = bbox.split(',')
-        return await getAreasByBox(xmin, ymin, xmax, ymax, type)
-      }
+      return findAreasByPoint(x, y)
     },
     options: {
       validate: {
         query: joi.object({
-          code: schema.code,
-          coord: schema.coord,
-          bbox: schema.bbox,
-          type: schema.type
-        }).oxor('coord', 'bbox', 'code')
+          x: joi.number().required(),
+          y: joi.number().required()
+        })
       },
-      description: 'Get areas within a bounding box'
+      description: 'Get areas that intersect a point'
     }
   }
 ]

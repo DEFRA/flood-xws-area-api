@@ -3,10 +3,14 @@ XWS contact API
 
 # Environment variables
 
-| name     | description      | required | default |            valid            | notes |
-|----------|------------------|:--------:|---------|:---------------------------:|-------|
-| NODE_ENV | Node environment |    no    |         | development,test,production |       |
-| PORT     | Port number      |    no    | 3000    |                             |       |
+| name                         | description                    | required   | valid                         |
+| :--------------------------  | :----------------------------  | :--------: | :---------------------------: |
+| ENV                          | Deployment environment         | yes        | sandbox,test,production       |
+| HOST                         | Hostname                       | yes        |                               |
+| PORT                         | Port number                    | yes        |                               |
+| DATABASE_URL                 | PG Database Url                | yes        |                               |
+| DATABASE_SSL                 | PG Database SSL flag           | no         | true/false                    |
+| LOG_LEVEL                    | Logging level                  | no         | "debug" (default) or "warn"   |
 
 # Prerequisites
 

@@ -21,6 +21,9 @@ async function createServer () {
   })
 
   // Register the plugins
+  await server.register(require('@hapi/inert'))
+  await server.register(require('@hapi/vision'))
+  await server.register(require('hapi-swagger'))
   await server.register(require('./plugins/router'))
   await server.register(require('./plugins/log-errors'))
   await server.register(require('./plugins/logging'))

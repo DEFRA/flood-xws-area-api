@@ -133,6 +133,7 @@ module.exports = [
           y: joi.number().required()
         })
       },
+      tags: ['api'],
       description: 'Get areas that intersect a point'
     }
   }

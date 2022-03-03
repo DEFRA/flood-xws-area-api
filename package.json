@@ -19,10 +19,13 @@
   "license": "OGL-UK-3.0",
   "dependencies": {
     "@hapi/hapi": "20.2.1",
+    "@hapi/inert": "6.0.5",
+    "@hapi/vision": "6.1.0",
     "blipp": "4.0.2",
     "dotenv": "16.0.0",
     "flood-xws-common": "github:DEFRA/flood-xws-common",
     "hapi-pino": "9.1.2",
+    "hapi-swagger": "14.2.5",
     "pg": "8.7.3"
   },
   "devDependencies": {

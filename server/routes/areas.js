@@ -112,7 +112,7 @@ const { query } = db(pool)
  */
 async function findAreasByPoint (x, y) {
   return query(`
-    select code, name
+    select code, name, category_id
     from xws_area.area a
     where st_intersects(st_setsrid(st_makepoint($1, $2), 4326), a.geom);`, [x, y])
 }
